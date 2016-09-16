@@ -53,3 +53,11 @@ Using Vaadin pre-releases
 
 If Vaadin pre-releases are not enabled by default, use the Maven parameter
 "-P vaadin-prerelease" or change the activation default value of the profile in pom.xml .
+
+Example dashboard
+-----------------
+![alt tag](https://github.com/jandebeule/iot-dashboard-app/blob/master/example1.png)
+![alt tag](https://github.com/jandebeule/iot-dashboard-app/blob/master/example2.png)
+![alt tag](https://github.com/jandebeule/iot-dashboard-app/blob/master/example3.png)
+
+
