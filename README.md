@@ -1,7 +1,10 @@
-mqttgui-app
+iot-dashboard-app
 ==============
 
-Template for a simple Vaadin application that only requires a Servlet 3.0 container to run.
+Vaadin application that only requires a Servlet 3.0 container to run.
+The application displays a UI based on the items.xml configuration file (see com.jandebeule.iot.dashboard.ItemsPersistence.java for an example).
+
+The starting point for the Vaadin application is com.jandebeule.iot.dashboard.MyUI.java  
 
 
 Workflow
