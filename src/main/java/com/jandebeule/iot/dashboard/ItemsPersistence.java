@@ -84,9 +84,9 @@ import com.jandebeule.iot.dashboard.Item.Type;
 //					<password>******</password>
 //					<topic>/topic/action</topic>
 //					<values>
-//						<VALUE_1>First Value</VALUE_1>
-//						<VALUE_2>Second Value</VALUE_2>
-//						<VALUE_3>Third Value</VALUE_3>
+//						<value name="VALUE_1">First Value</value>
+//						<value name="VALUE_2">Second Value</value>
+//						<value name="VALUE_3">Third Value</value>
 //					</values>
 //					<feedback_topic>/topic/feedback_state</feedback_topic>
 //					<feedback_values>
@@ -330,7 +330,7 @@ public class ItemsPersistence {
 							NodeList valuesItem = nlItem.item(l).getChildNodes();
 	        				for(int v=0 ; v<valuesItem.getLength() ; v++) {
 	        					if(valuesItem.item(v).getNodeType() == 1) {
-	        						item.getPublishValueMap().put(valuesItem.item(v).getNodeName().toUpperCase(), valuesItem.item(v).getTextContent().toUpperCase());
+	        						item.getPublishValueMap().put(valuesItem.item(v).getAttributes().getNamedItem("name").getTextContent(), valuesItem.item(v).getTextContent());
 	        					}
 	        				}
 							break;

@@ -16,7 +16,7 @@ public class Item {
 		GRID 					// a nested grid that contains additional Items
 	}
 	
-	private String caption;
+	private String caption = "";
 	private Type type;
 	private String broker;
 	private String username;
@@ -29,7 +29,7 @@ public class Item {
 	private double publishValueMin;			 // minimum value of a slider
 	private double publishValueMax;			 // maximum value of a slider
 	private HashMap<String, String> publishValueMap = new HashMap<String, String>(); // possible values for MQTT publish (using dropdown) and the mapping to their representation in the GUI (i.e. the values displayed in the dropdown)
-	private String feedbackTopic;			 // MQTT topic that can be used by an Item that publishes to an (other) MQTT topic to reflect the current state 
+	private String feedbackTopic = "";			 // MQTT topic that can be used by an Item that publishes to an (other) MQTT topic to reflect the current state 
 	private HashMap<String, List<String>> feedbackToPublishValueMap = new HashMap<String, List<String>>();  // mapping from received values on feedback MQTT topic to which values should not be displayed in the dropdown
 	
 	private String url;			// url for HTTP items

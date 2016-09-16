@@ -92,13 +92,15 @@ public class MqttSelect extends CssLayout {
 				new Thread(new Runnable() {
 					@Override
 					public void run() {
-						try {
-							mqttClient.subscribe(feedbackTopic);
-						} catch (Exception ex) {
-							System.out.println("Unable to subscribe to topic '" + feedbackTopic + "' :" + ex.getMessage());
-							ex.printStackTrace();
+						if(feedbackTopic != null && !feedbackTopic.isEmpty()) {
+							try {
+								mqttClient.subscribe(feedbackTopic);
+							} catch (Exception ex) {
+								System.out.println("Unable to subscribe to topic '" + feedbackTopic + "' :" + ex.getMessage());
+								ex.printStackTrace();
+							}
+							System.out.println("Subscribed to topic '" + feedbackTopic + "'");
 						}
-						System.out.println("Subscribed to topic '" + feedbackTopic + "'");
 					}
 				}).start();
 			}
@@ -106,13 +108,15 @@ public class MqttSelect extends CssLayout {
 		addDetachListener(new DetachListener() {
 			@Override
 			public void detach(DetachEvent event) {
-				try {
-					mqttClient.unsubscribe(feedbackTopic);
-				} catch (Exception ex) {
-					System.out.println("Unable to unsubscribe to topic '" + feedbackTopic + "' :" + ex.getMessage());
-					ex.printStackTrace();
+				if(feedbackTopic != null && !feedbackTopic.isEmpty()) {
+					try {
+						mqttClient.unsubscribe(feedbackTopic);
+					} catch (Exception ex) {
+						System.out.println("Unable to unsubscribe to topic '" + feedbackTopic + "' :" + ex.getMessage());
+						ex.printStackTrace();
+					}
+					System.out.println("Unsubscribed to topic '" + feedbackTopic + "'");
 				}
-				System.out.println("Unsubscribed to topic '" + feedbackTopic + "'");
 			}
 		});
 		
