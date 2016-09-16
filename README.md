@@ -6,11 +6,11 @@ The application displays a UI based on the items.xml configuration file (see com
 
 A dashboard consists of a tabsheet where you can define your own tabs with each tab contains its configured items.
 Currently following items are supported to add to your dashboard (see also com.jandebeule.iot.dashboard.Item.java):
-		HTTP_SUBSCRIBE, 		// a HTML page that is refreshed at a fixed interval
-		MQTT_SUBSCRIBE_LABEL,	// A Textfield showing the content from a MQTT topic
-		MQTT_PUBLISH_SELECT,	// A dropdown/button which value is published to a MQTT topic
-		MQTT_PUBLISH_SLIDER,	// A slider which value is published to a MQTT topic
-		GRID 					// a nested grid that contains additional Items
+- HTTP_SUBSCRIBE : a HTML page that is refreshed at a fixed interval
+- MQTT_SUBSCRIBE_LABEL : a Textfield showing the content from a MQTT topic
+- MQTT_PUBLISH_SELECT : a dropdown/button which value is published to a MQTT topic
+- MQTT_PUBLISH_SLIDER : a slider which value is published to a MQTT topic
+- GRID : a nested grid that contains additional Items
 
 The starting point for the Vaadin application is com.jandebeule.iot.dashboard.MyUI.java  
 
