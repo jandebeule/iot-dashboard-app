@@ -15,18 +15,22 @@ import com.vaadin.server.ClientConnector.DetachListener;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Component;
+import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.NativeSelect;
 import com.vaadin.ui.Slider;
 import com.vaadin.ui.UI;
 
 // slider that publishes its value to a MQTT topic
-public class MqttSlider extends Slider {
+public class MqttSlider extends HorizontalLayout {
 	
 	MqttClient mqttClient;
 	String topic;
 	String valuePrefix;
 	Property.ValueChangeListener valueChangeListener;
+	Button min;
+	Button plus;
+	Slider slider;
 	
 	public MqttSlider(String caption, String broker, String topic, String feedbackTopic,
 			final String valuePrefix, final double valueMin, final double valueMax,
@@ -34,24 +38,53 @@ public class MqttSlider extends Slider {
 		this.topic = topic;
 		this.valuePrefix = valuePrefix;
 		setCaptionAsHtml(true);
-		setCaption("<b>" + caption + "</b>");
-		setWidth("100%");
-		setMin(valueMin);
-		setMax(valueMax);
-		setImmediate(true);
+		if(!caption.isEmpty()) {
+			setCaption("<b>" + caption + "</b>");
+		}
+		min = new Button("-", new Button.ClickListener() {
+			@Override
+			public void buttonClick(ClickEvent event) {
+				try {
+					Double value = slider.getValue() - ((valueMax-valueMin)/20.0);
+					mqttClient.publish(topic, (valuePrefix + value.toString()).getBytes(), 0, false);
+					System.out.println("Published '" + valuePrefix + slider.getValue() + "' to topic '" + topic + "'");
+				} catch (Exception ex) {
+					System.out.println("Unable to publish to '" + topic + "' : " + ex.getMessage());
+					ex.printStackTrace();
+				}
+			}
+		});
+		plus = new Button("+", new Button.ClickListener() {
+			@Override
+			public void buttonClick(ClickEvent event) {
+				try {
+					Double value = slider.getValue() + ((valueMax-valueMin)/20.0);
+					mqttClient.publish(topic, (valuePrefix + value.toString()).getBytes(), 0, false);
+					System.out.println("Published '" + valuePrefix + slider.getValue() + "' to topic '" + topic + "'");
+				} catch (Exception ex) {
+					System.out.println("Unable to publish to '" + topic + "' : " + ex.getMessage());
+					ex.printStackTrace();
+				}
+			}
+		});
+		min.setStyleName("tiny");
+		plus.setStyleName("tiny");
+		setSizeFull();
+		slider = new Slider(valueMin, valueMax, 0);
+		slider.setImmediate(true);
 		valueChangeListener = new Property.ValueChangeListener() {
 			@Override
 			public void valueChange(Property.ValueChangeEvent event) {
 				try {
-					mqttClient.publish(topic, (valuePrefix + getValue().toString()).getBytes(), 0, false);
-					System.out.println("Published '" + valuePrefix + getValue() + "' to topic '" + topic + "'");
+					mqttClient.publish(topic, (valuePrefix + slider.getValue().toString()).getBytes(), 0, false);
+					System.out.println("Published '" + valuePrefix + slider.getValue() + "' to topic '" + topic + "'");
 				} catch (Exception ex) {
 					System.out.println("Unable to publish to '" + topic + "' : " + ex.getMessage());
 					ex.printStackTrace();
 				}
 			}
 		};
-		addValueChangeListener(valueChangeListener);
+		slider.addValueChangeListener(valueChangeListener);
 		System.out.println("Connecting with broker '" + broker + "', username=" + username + ", password=" + password);
 		mqttClient = connect(broker, username, password);
 		mqttClient.setCallback(new MqttCallback() {
@@ -62,10 +95,18 @@ public class MqttSlider extends Slider {
 				try {
 					UI.getCurrent().getSession().getLockInstance().lock();
 					try {
-						removeValueChangeListener(valueChangeListener);
-						setValue(Double.parseDouble(messageStr.substring(messageStr.indexOf('=') + 1)));
+						slider.removeValueChangeListener(valueChangeListener);
+						slider.setValue(Double.parseDouble(messageStr.substring(messageStr.indexOf('=') + 1)));
+						// bug fix for slider growing in size (only in Chrome?) when value is set and thus pushing the '+' button out of the visible area
+						// solution : rebuild the MqttSlider layout, but first temporarily push empty layout (user won't notice this)
+						removeAllComponents();
 						UI.getCurrent().push();
-						addValueChangeListener(valueChangeListener);
+						slider.addValueChangeListener(valueChangeListener);
+						setSizeFull();
+						addComponent(min);
+						addComponent(slider);
+						setExpandRatio(slider, 1f);
+						addComponent(plus);
 						UI.getCurrent().push();
 					} finally {
 						UI.getCurrent().getSession().getLockInstance().unlock();
@@ -121,7 +162,10 @@ public class MqttSlider extends Slider {
 				}
 			}
 		});
-		
+		addComponent(min);
+		addComponent(slider);
+		setExpandRatio(slider, 1f);
+		addComponent(plus);
 	}
 	
 	

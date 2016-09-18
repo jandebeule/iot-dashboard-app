@@ -32,7 +32,7 @@ public class Grid extends CustomLayout {
 		for(int row = 0 ; row < items.length ; row++) {
 			template += "<tr style=\"height: " + (int)Math.round(100.0/items.length) + "%; border: " + borderThickness + "px solid black;\">";
 			for(int col = 0 ; col < items[row].length; col++) {
-				template += "<td style=\"width: " + (int)Math.round(100.0/items[row].length) + "%; border: " + borderThickness + "px solid black;\"><div style=\"width: 100%; height: 100%;\" location=\"element_" + row + "_" + col + "\"></div></td>";
+				template += "<td style=\"padding: 0px 5px 0px 5px; width: " + (int)Math.round(100.0/items[row].length) + "%; border: " + borderThickness + "px solid black;\"><div style=\"width: 100%; height: 100%;\" location=\"element_" + row + "_" + col + "\"></div></td>";
 			}
 			template += "</tr>";
 		}
