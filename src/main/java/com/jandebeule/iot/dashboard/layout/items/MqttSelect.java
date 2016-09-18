@@ -1,7 +1,12 @@
 package com.jandebeule.iot.dashboard.layout.items;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
@@ -12,7 +17,6 @@ import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
-import com.vaadin.server.ClientConnector.DetachEvent;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Component;
@@ -28,11 +32,13 @@ public class MqttSelect extends CssLayout {
 	MqttClient mqttClient;
 	String topic;
 	String valuePrefix;
+	String feedbackTopic = "";
 	
 	public MqttSelect(String caption, String broker, String topic, String feedbackTopic, String valuePrefix,
 			final HashMap<String, String> valuesMap, HashMap<String, List<String>> feedbackValuesMap,
 			String username, String password) {
 		this.topic = topic;
+		this.feedbackTopic = feedbackTopic;
 		this.valuePrefix = valuePrefix;
 		setCaptionAsHtml(true);
 		if(!caption.isEmpty()) {
@@ -129,9 +135,10 @@ public class MqttSelect extends CssLayout {
 		if(valuesMap.size() > 1) {
 			select = new NativeSelect();
 			((NativeSelect)select).setImmediate(true);
-			for(String value : valuesMap.keySet()) {
-				((NativeSelect)select).addItem(value);
-				((NativeSelect)select).setItemCaption(value, valuesMap.get(value));
+			List<Entry<String, String>> sortedValues = entriesSortedByValues(valuesMap);
+			for(Entry<String, String> entry : sortedValues) {
+				((NativeSelect)select).addItem(entry.getKey());
+				((NativeSelect)select).setItemCaption(entry.getKey(), entry.getValue());
 			}
 			((NativeSelect)select).addValueChangeListener(new Property.ValueChangeListener() {
 				@Override
@@ -139,6 +146,9 @@ public class MqttSelect extends CssLayout {
 					try {
 						mqttClient.publish(topic, (valuePrefix + (String)((NativeSelect)select).getValue()).getBytes(), 0, false);
 						System.out.println("Published '" + valuePrefix + ((NativeSelect)select).getValue() + "' to topic '" + topic + "'");
+						if(feedbackTopic == null || feedbackTopic.isEmpty()) {
+							updateSelect(valuesMap);
+						}
 					} catch (Exception ex) {
 						System.out.println("Unable to publish to '" + topic + "' : " + ex.getMessage());
 						ex.printStackTrace();
@@ -187,5 +197,21 @@ public class MqttSelect extends CssLayout {
 			ex.printStackTrace();
 		}
 		return null;
+	}
+	
+	static <K,V extends Comparable<? super V>> 
+	    List<Entry<K, V>> entriesSortedByValues(Map<K,V> map) {	
+		List<Entry<K,V>> sortedEntries = new ArrayList<Entry<K,V>>(map.entrySet());
+	
+		Collections.sort(sortedEntries, 
+		    new Comparator<Entry<K,V>>() {
+		        @Override
+		        public int compare(Entry<K,V> e1, Entry<K,V> e2) {
+		            return e2.getValue().compareTo(e1.getValue());
+		        }
+		    }
+		);
+		
+		return sortedEntries;
 	}
 }
