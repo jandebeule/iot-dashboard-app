@@ -10,6 +10,7 @@ Currently following items are supported to add to your dashboard (see also com.j
 - MQTT_SUBSCRIBE_LABEL : a Textfield showing the content from a MQTT topic
 - MQTT_PUBLISH_SELECT : a dropdown/button which value is published to a MQTT topic
 - MQTT_PUBLISH_SLIDER : a slider which value is published to a MQTT topic
+- MQTT_SEARCH : textfield (combined with optional category dropdown) that publishes its value to a MQTT topic and displays search results from another MQTT topic in a dropdown that can publish its value to a third MQTT topic
 - GRID : a nested grid that contains additional Items
 
 The starting point for the Vaadin application is com.jandebeule.iot.dashboard.MyUI.java  
