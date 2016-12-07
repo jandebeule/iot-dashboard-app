@@ -17,7 +17,8 @@ public class HtmlPage extends BrowserFrame {
 	public HtmlPage(String caption, String url, int updateIntervalSeconds) {
 		setCaptionAsHtml(true);
 		setCaption("<b>" + caption + "</b>");
-		setSizeFull();
+		setSizeUndefined();
+		setHeight("100%");
 		this.caption = caption;
 		this.url = url;
 		this.updateIntervalSeconds = updateIntervalSeconds;

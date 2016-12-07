@@ -1,5 +1,6 @@
 package com.jandebeule.iot.dashboard;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -11,8 +12,10 @@ public class Item {
 		HTTP_SUBSCRIBE, 		// a HTML page that is refreshed at a fixed interval
 		HTTP_PUBLISH,   		// TO BE IMPLEMENTED (REST call?)
 		MQTT_SUBSCRIBE_LABEL,	// A Label showing the content from a MQTT topic
+		MQTT_SUBSCRIBE_GAUGE,	// A Gauge showing the (numeric) content from a MQTT topic
 		MQTT_PUBLISH_SELECT,	// A dropdown/button which value is published to a MQTT topic
 		MQTT_PUBLISH_SLIDER,	// A slider which value is published to a MQTT topic
+		MQTT_SEARCH,			// A Search field that gets results back from MQTT
 		GRID 					// a nested grid that contains additional Items
 	}
 	
@@ -36,6 +39,15 @@ public class Item {
 	private int updateIntervalSeconds;	// update interval for HTTP_SUBSCRIBE
 	
 	private int borderThickness = 0;	// border thickness for a nested Grid
+	
+	private int gaugeMin = 0;			// minimum value of a gauge
+	private int gaugeMax = 100;			// maximum value of a gauge
+	private String gaugeHistoryUrl = ""; // url with image that contains history values for gauge
+	
+	private String searchTopic;			// topic to publish search query
+	private String resultTopic;			// topic to get results from search query
+	private String selectTopic;			// topic to publish selected result from search query
+	private List<String> categories = new ArrayList<String>();  // (optional) additional category that can be added to the published search query
 	
 	private Item[][] grid;			// items for a nested Grid
 	
@@ -141,7 +153,54 @@ public class Item {
 	public void setBorderThickness(int borderThickness) {
 		this.borderThickness = borderThickness;
 	}
-	
+	public int getGaugeMin() {
+		return gaugeMin;
+	}
+	public void setGaugeMin(int gaugeMin) {
+		this.gaugeMin = gaugeMin;
+	}
+	public int getGaugeMax() {
+		return gaugeMax;
+	}
+	public void setGaugeMax(int gaugeMax) {
+		this.gaugeMax = gaugeMax;
+	}
+	public String getGaugeHistoryUrl() {
+		return gaugeHistoryUrl;
+	}
+	public void setGaugeHistoryUrl(String gaugeHistoryUrl) {
+		this.gaugeHistoryUrl = gaugeHistoryUrl;
+	}
+	public String getSearchTopic() {
+		return searchTopic;
+	}
+	public void setSearchTopic(String searchTopic) {
+		this.searchTopic = searchTopic;
+	}
+	public String getResultTopic() {
+		return resultTopic;
+	}
+	public void setResultTopic(String resultTopic) {
+		this.resultTopic = resultTopic;
+	}
+	public String getSelectTopic() {
+		return selectTopic;
+	}
+	public void setSelectTopic(String selectTopic) {
+		this.selectTopic = selectTopic;
+	}
+	public List<String> getCategories() {
+		return categories;
+	}
+	public void setCategories(List<String> categories) {
+		this.categories = categories;
+	}
+	public void addCategory(String category) {
+		if(categories == null) {
+			categories = new ArrayList<String>();
+		}
+		categories.add(category);
+	}
 	
 	
 }

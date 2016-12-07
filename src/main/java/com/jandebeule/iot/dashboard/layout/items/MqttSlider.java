@@ -9,6 +9,7 @@ import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 
+import com.jandebeule.iot.dashboard.MqttClientProvider;
 import com.vaadin.data.Property;
 import com.vaadin.server.ClientConnector.DetachEvent;
 import com.vaadin.server.ClientConnector.DetachListener;
@@ -26,6 +27,7 @@ public class MqttSlider extends HorizontalLayout {
 	
 	MqttClient mqttClient;
 	String topic;
+	String feedbackTopic;
 	String valuePrefix;
 	Property.ValueChangeListener valueChangeListener;
 	Button min;
@@ -36,6 +38,7 @@ public class MqttSlider extends HorizontalLayout {
 			final String valuePrefix, final double valueMin, final double valueMax,
 			String username, String password) {
 		this.topic = topic;
+		this.feedbackTopic = feedbackTopic;
 		this.valuePrefix = valuePrefix;
 		setCaptionAsHtml(true);
 		if(!caption.isEmpty()) {
@@ -85,83 +88,26 @@ public class MqttSlider extends HorizontalLayout {
 			}
 		};
 		slider.addValueChangeListener(valueChangeListener);
-		System.out.println("Connecting with broker '" + broker + "', username=" + username + ", password=" + password);
-		mqttClient = connect(broker, username, password);
-		mqttClient.setCallback(new MqttCallback() {
-			@Override
-			public void messageArrived(String topic, MqttMessage message) throws Exception {
-				String messageStr = new String(message.getPayload());
-				System.out.println("MQTT message received for topic '" + topic + "': " + messageStr + ", updating slider");
-				try {
-					UI.getCurrent().getSession().getLockInstance().lock();
-					try {
-						slider.removeValueChangeListener(valueChangeListener);
-						slider.setValue(Double.parseDouble(messageStr.substring(messageStr.indexOf('=') + 1)));
-						// bug fix for slider growing in size (only in Chrome?) when value is set and thus pushing the '+' button out of the visible area
-						// solution : rebuild the MqttSlider layout, but first temporarily push empty layout (user won't notice this)
-						removeAllComponents();
-						UI.getCurrent().push();
-						slider.addValueChangeListener(valueChangeListener);
-						setSizeFull();
-						addComponent(min);
-						addComponent(slider);
-						setExpandRatio(slider, 1f);
-						addComponent(plus);
-						UI.getCurrent().push();
-					} finally {
-						UI.getCurrent().getSession().getLockInstance().unlock();
-					}
-				} catch (Exception ex) {
-					System.out.println("Unable to update MqttSlider '" + caption + "'");
-					ex.printStackTrace();
+		mqttClient = MqttClientProvider.getInstance().getMqttClient(broker, username, password);
+		if(feedbackTopic != null && !feedbackTopic.isEmpty()) {
+			MqttClientProvider.getInstance().addMqttMessageListener(mqttClient, MqttClientProvider.getInstance().new MqttMessageListener(feedbackTopic, UI.getCurrent()) {
+				@Override
+				public void onMessage(String message) {
+					slider.removeValueChangeListener(valueChangeListener);
+					slider.setValue(Double.parseDouble(message.substring(message.indexOf('=') + 1)));
+					// bug fix for slider growing in size (only in Chrome?) when value is set and thus pushing the '+' button out of the visible area
+					// solution : rebuild the MqttSlider layout, but first temporarily push empty layout (user won't notice this)
+					removeAllComponents();
+					getUi().push();
+					slider.addValueChangeListener(valueChangeListener);
+					setSizeFull();
+					addComponent(min);
+					addComponent(slider);
+					setExpandRatio(slider, 1f);
+					addComponent(plus);
 				}
-			}
-			
-			@Override
-			public void deliveryComplete(IMqttDeliveryToken token) {
-				// don't care
-			}
-			
-			@Override
-			public void connectionLost(Throwable cause) {
-				System.out.println("MqttSlider: Lost connection with MQTT: " + cause.getMessage());
-				cause.printStackTrace();
-			}
-		});
-		addAttachListener(new AttachListener() {
-			@Override
-			public void attach(AttachEvent event) {
-				new Thread(new Runnable() {
-					@Override
-					public void run() {
-						if(feedbackTopic != null && !feedbackTopic.isEmpty()) {
-							try {
-								mqttClient.subscribe(feedbackTopic);
-							} catch (Exception ex) {
-								System.out.println("Unable to subscribe to topic '" + feedbackTopic + "' :" + ex.getMessage());
-								ex.printStackTrace();
-							}
-							System.out.println("Subscribed to topic '" + feedbackTopic + "'");
-						}
-					}
-				}).start();
-			}
-		});
-		
-		addDetachListener(new DetachListener() {
-			@Override
-			public void detach(DetachEvent event) {
-				if(feedbackTopic != null && !feedbackTopic.isEmpty()) {
-					try {
-						mqttClient.unsubscribe(feedbackTopic);
-					} catch (Exception ex) {
-						System.out.println("Unable to unsubscribe to topic '" + feedbackTopic + "' :" + ex.getMessage());
-						ex.printStackTrace();
-					}
-					System.out.println("Unsubscribed to topic '" + feedbackTopic + "'");
-				}
-			}
-		});
+			});
+		}
 		addComponent(min);
 		addComponent(slider);
 		setExpandRatio(slider, 1f);
@@ -172,7 +118,7 @@ public class MqttSlider extends HorizontalLayout {
 	protected MqttClient connect(String broker, String username, String password) {
 		try {
 			MemoryPersistence persistence = new MemoryPersistence();
-			MqttClient mqttClient = new MqttClient(broker, "MqttGUI_" + System.currentTimeMillis(), persistence);
+			MqttClient mqttClient = new MqttClient(broker, "MqttGUI_Slider_" + feedbackTopic + "_" + System.currentTimeMillis(), persistence);
 			MqttConnectOptions connOptions = new MqttConnectOptions();
 			connOptions.setUserName(username);
 			connOptions.setPassword(password.toCharArray());

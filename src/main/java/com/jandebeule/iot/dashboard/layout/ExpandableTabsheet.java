@@ -50,9 +50,9 @@ public class ExpandableTabsheet extends TabSheet {
 //		});
 	}
 	
-	public Tab addTab(String caption) {
+	public Tab addTab(String location, String caption) {
 		//removeTab(getTab(getComponentCount() - 1));
-		Tab tab = addTab(new Grid(caption), caption);
+		Tab tab = addTab(new Grid(location, caption), caption);
 		//addTab(new Label(), "+");
 		return tab;
 	}

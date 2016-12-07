@@ -13,13 +13,18 @@
 
 // Affects the color of some component elements, e.g Button, Panel title, etc
 //$v-background-color: hsl(210, 0%, 98%);
+//$v-background-color: rgb(2, 27, 46);
+$v-background-color: rgb(0, 0, 0);
 // Affects the color of content areas, e.g  Panel and Window content, TextField input etc
-//$v-app-background-color: $v-background-color;
+$v-app-background-color: $v-background-color;
 
 // Affects the visual appearance of all components
 //$v-gradient: v-linear 8%;
 //$v-bevel-depth: 30%;
 //$v-shadow-opacity: 5%;
+$v-gradient: v-linear 0%;
+$v-bevel-depth: 0%;
+$v-shadow-opacity: 0%;
 
 // Defines colors for indicating status (focus, success, failure)
 //$v-focus-color: valo-focus-color(); // Calculates a suitable color automatically
@@ -61,6 +66,32 @@
 	display: block;
 	width: 100%;
 	vertical-align: middle;
+}
+.v-select select {
+	@include background-image(linear-gradient(to bottom,#222222 0%, #222222 100%));
+}
+
+.v-button {
+	//@include background-image(linear-gradient(to bottom,#222222 0%, #222222 100%));
+	@include background-image(linear-gradient(to bottom,#000000 0%, #000000 100%));
+	//021b5f
+}
+
+.v-slider-handle:before, .v-slider-handle:after {
+	margin-top: 3px;
+	width: 32px;
+	height: 32px;
+	border-radius: 32px;
+}
+
+.v-slider-handle:before {
+	@include background-image(linear-gradient(to bottom,#444444 0%, #666666 100%));
+	//@include background-image(linear-gradient(to bottom,#98c3e4 0%, #98c3e4 100%));
+}
+
+.v-slider-base {
+	@include background-image(linear-gradient(to bottom,#ffffff 0%, #ffffff 100%));
+	height: 1px;
 }
 
 }

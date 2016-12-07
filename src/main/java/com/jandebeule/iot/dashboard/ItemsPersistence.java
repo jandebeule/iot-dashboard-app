@@ -56,12 +56,17 @@ import com.jandebeule.iot.dashboard.Item.Type;
 //					<row>0</row>
 //					<col>1</col>
 //					<caption>Caption for item at 0,1</caption> 
-//					<type>MQTT_SUBSCRIBE_LABEL</type>
+//					<type>MQTT_SEARCH</type>
 //					<broker>tcp://10.1.1.2:1883</broker>
 //					<username>user</username>
 //					<password>*****</password>
-//					<topic>/topic/second</topic>
-//					<font_size>40</font_size>
+//					<search_topic>/topic/second</search_topic>
+//					<search_results_topic>/topic/second_results</search_results_topic>
+//					<search_result_select_topic>/topic/second_result_select</search_result_select_topic>
+//					<categories>
+//						<category>first_category</category>
+//						<category>second_category</category>
+//					</categories>
 //				</item>
 //			</grid>
 //		</item>
@@ -151,11 +156,9 @@ import com.jandebeule.iot.dashboard.Item.Type;
 //</tabs>
 public class ItemsPersistence {
 
-	private static final String XML_FILE = "items.xml";
-	
 	// fetch all "tab" elements from configuration file
-	public static List<String> getTabs() {
-		System.out.println("Fetching tabs from config file: " + new File(XML_FILE).getAbsolutePath());
+	public static List<String> getTabs(String location) {
+		System.out.println("Fetching tabs from config file: " + new File("items_" + location + ".xml").getAbsolutePath());
 		List<String> tabs = new ArrayList<String>();
         Document dom;
         // Make an  instance of the DocumentBuilderFactory
@@ -165,7 +168,7 @@ public class ItemsPersistence {
             DocumentBuilder db = dbf.newDocumentBuilder();
             // parse using the builder to get the DOM mapping of the    
             // XML file
-            dom = db.parse(XML_FILE);
+            dom = db.parse("items_" + location + ".xml");
             Element doc = dom.getDocumentElement();
             NodeList nl = doc.getElementsByTagName("tab");
             System.out.println("" + nl.getLength() + " tabs found in configuration");
@@ -193,8 +196,8 @@ public class ItemsPersistence {
 	}
 	
 	// get the content from a "tab" element described in the configuration file
-	public static GridItem getTabItems(String tabName) {
-		System.out.println("Fetching tab items for tab '" + tabName + "' from config file: " + new File(XML_FILE).getAbsolutePath());
+	public static GridItem getTabItems(String location, String tabName) {
+		System.out.println("Fetching tab items for tab '" + tabName + "' from config file: " + new File("items_" + location + ".xml").getAbsolutePath());
 		int rows = -1;
 		int cols = -1;
 		Document dom;
@@ -205,7 +208,7 @@ public class ItemsPersistence {
             DocumentBuilder db = dbf.newDocumentBuilder();
             // parse using the builder to get the DOM mapping of the    
             // XML file
-            dom = db.parse(XML_FILE);
+            dom = db.parse("items_" + location + ".xml");
             Element doc = dom.getDocumentElement();
             NodeList nl = doc.getElementsByTagName("tab");
             System.out.println("" + nl.getLength() + " tabs found in configuration");
@@ -305,6 +308,15 @@ public class ItemsPersistence {
 						case "feedback_topic":
 							item.setFeedbackTopic(nlItem.item(l).getTextContent());
 							break;
+						case "search_topic":
+							item.setSearchTopic(nlItem.item(l).getTextContent());
+							break;
+						case "search_results_topic":
+							item.setResultTopic(nlItem.item(l).getTextContent());
+							break;
+						case "search_result_select_topic":
+							item.setSelectTopic(nlItem.item(l).getTextContent());
+							break;	
 						case "row":
 							row = Integer.valueOf(nlItem.item(l).getTextContent());
 							break;
@@ -349,11 +361,28 @@ public class ItemsPersistence {
 	        					}
 	        				}
 							break;
+						case "categories":
+							NodeList categoriesItem = nlItem.item(l).getChildNodes();
+	        				for(int v=0 ; v<categoriesItem.getLength() ; v++) {
+	        					if(categoriesItem.item(v).getNodeType() == 1) {
+	        						item.getCategories().add(categoriesItem.item(v).getTextContent());
+	        					}
+	        				}
+							break;
 						case "url":
 							item.setUrl(nlItem.item(l).getTextContent());
 							break;
 						case "update_interval_secs":
 							item.setUpdateIntervalSeconds(Integer.parseInt(nlItem.item(l).getTextContent()));
+							break;
+						case "gauge_min":
+							item.setGaugeMin(Integer.parseInt(nlItem.item(l).getTextContent()));
+							break;
+						case "gauge_max":
+							item.setGaugeMax(Integer.parseInt(nlItem.item(l).getTextContent()));
+							break;
+						case "gauge_history_url":
+							item.setGaugeHistoryUrl(nlItem.item(l).getTextContent());
 							break;
 						}
 						
